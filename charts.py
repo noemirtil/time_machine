@@ -37,21 +37,22 @@ def get_charts(y):
             while i < 7:
                 if i in (1, 3, 5):
                     # select only the songs (and not the albums) to feed the dictionary
-                    if matches := re.fullmatch(
-                        r"(.+)\[\d+\](.+)", html_col[i].text.strip()
+                    if matches := re.search(
+                        r'(?:"?(.+)"\[\d.*\](.+)\n)?(.+)\[\d.*\](.+)',
+                        html_col[i].text.strip(),
                     ):
-                        years[year][f"song_{i}"] = matches.group(1)
-                        years[year][f"artist_{i}"] = matches.group(2)
-                    # elif matches := re.fullmatch(
-                    #     r"(\".+\")\[\d\d\]\[\d\d\]\[self-published source\](.+)",
-                    #     html_col[i].text.strip(),
-                    # ):
-                    #     years[year][f"song_{i}"] = matches.group(1)
-                    #     years[year][f"artist_{i}"] = matches.group(2)
-                    if not (f"song_{i}", f"artist_{i}") in years[year].keys():
+                        years[year][f"song_{i}"] = matches.group(3)
+                        years[year][f"artist_{i}"] = matches.group(4)
+
+                    if not f"song_{i}" in years[year].keys():
                         years[year][f"song_{i}"] = "Not found 🙃"
-                        # if not f"artist_{i}" in years[year].keys():
+                    if not f"artist_{i}" in years[year].keys():
                         years[year][f"artist_{i}"] = "Not found 🙃"
+                    if years[year][f"song_{i}"][0] != '"':
+                        years[year][f"song_{i}"] = '"' + years[year][f"song_{i}"]
+                    if years[year][f"song_{i}"][-1] != '"':
+                        years[year][f"song_{i}"] = years[year][f"song_{i}"] + '"'
+
                 i += 1
     return years[y]
 

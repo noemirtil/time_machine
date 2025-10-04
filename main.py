@@ -42,7 +42,7 @@ Country charts:
         by {year_charts['artist_5']}
 
 
-Here are some significant quotes from these songs:
+Here are some characteristic quotes from these songs:
 """
             )
 
@@ -59,9 +59,7 @@ Here are some significant quotes from these songs:
                             song=year_charts[f"song_{i}"],
                         )
                     except KeyError:
-                        print(
-                            f"\nCouldn't retrieve some {year} {i} data, please try again 🙃\n"
-                        )
+                        print(f"\nCouldn't retrieve that song's lyrics 🙃\n")
                 i += 1
 
         else:

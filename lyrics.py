@@ -52,7 +52,8 @@ def get_lyrics(artist, song):
             print("")
             if len(unique_quotes) > 0:
                 for quote in unique_quotes[:4]:
-                    quote_print = quote.replace("\n", "").capitalize()
+                    quote[0].upper()
+                    quote_print = quote.replace("\n", "")
                     if quote_print[0] != "(":
                         print(quote_print)
             else:
