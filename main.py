@@ -27,7 +27,7 @@ Please type a year between 1946 and 2024:
             print(
                 f"""
 
-================== {year} TOP SONGS ==================
+================= {year} TOP SINGLES =================
 
 Pop charts:
         {year_charts['song_1']}

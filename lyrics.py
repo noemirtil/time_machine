@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import requests
-import json
+
+# import json
 import re
 import lyricsgenius
 
@@ -40,27 +41,42 @@ def get_lyrics(artist, song):
             )
             # extend quotes list to the most repeated words
             for word in sorted_words:
-                if sorted_words[word] > 4 and len(word) > 5:
+                if sorted_words[word] > 3 and len(word) > 4:
                     quotes.extend(
                         re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I)
                     )
+            # more quotes cleaning
+            # for quote in quotes:
+            #     quote = re.sub(r" ,", " ", quote)
+            #     print(quote)
             # remove duplicates
             unique_quotes = list(
-                set(map(str.strip, [s.replace('"', "") for s in quotes]))
+                set(
+                    map(
+                        str.strip,
+                        [
+                            s.replace('"', "").replace(" ,", " ").replace("  ", " ")
+                            for s in quotes
+                        ],
+                    )
+                )
             )
             unique_quotes.sort(key=lambda s: len(s))
             print("")
             if len(unique_quotes) > 0:
-                for quote in unique_quotes[:4]:
+                selected_quotes = []
+                for quote in unique_quotes:
                     quote[0].upper()
-                    quote_print = quote.replace("\n", "")
-                    if quote_print[0] != "(":
-                        print(quote_print)
+                    quote_format = quote.replace("\n", "")
+                    if quote_format[0] != "(" and len(quote_format.split(" ")) > 2:
+                        selected_quotes.append(quote_format)
+                for quote in selected_quotes[:4]:
+                    print(quote)
             else:
                 print("Sorry, this song lacks lyrics 🙃")
             print(
                 f"""
-======================================================
+~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
             """
             )
         else:

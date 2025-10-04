@@ -48,6 +48,9 @@ def get_charts(y):
                         years[year][f"song_{i}"] = "Not found 🙃"
                     if not f"artist_{i}" in years[year].keys():
                         years[year][f"artist_{i}"] = "Not found 🙃"
+                    years[year][f"song_{i}"] = re.sub(
+                        r"\[\d+\]", "", years[year][f"song_{i}"]
+                    )
                     if years[year][f"song_{i}"][0] != '"':
                         years[year][f"song_{i}"] = '"' + years[year][f"song_{i}"]
                     if years[year][f"song_{i}"][-1] != '"':
