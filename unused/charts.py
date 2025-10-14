@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import json
-import requests
-import sys
+# import json
+# import requests
+# import sys
 
 import re
 import wikipedia
@@ -10,7 +10,8 @@ import wikipedia
 # from albums import discography
 
 from bs4 import BeautifulSoup
-import requests as r
+
+# import requests as r
 
 
 def get_charts(y):

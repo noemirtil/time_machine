@@ -3,7 +3,7 @@
 import json
 import requests
 import sys
-import albums
+import unused.albums as albums
 
 
 def main():
