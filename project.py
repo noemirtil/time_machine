@@ -27,12 +27,14 @@ Please type a year between 1946 and 2024:
 
 => """
     )
+    # get that year's top charts from Wikipedia
     try:
         if 1945 < int(year) < 2025:
             print("\nRetrieving data...\n")
             year_charts = get_charts(year)
 
             screen_clean()
+            # display only the singles, not the albums, that's why the numbers are even:
             print(
                 f"""
 ================= {year} TOP SINGLES =================
@@ -55,7 +57,7 @@ Country charts:
 
 """
             )
-
+            # for each song, retrieve the lyrics from Genius, extract the best quotes and display them:
             i = 1
             while i < 7:
                 if (
@@ -91,26 +93,26 @@ def get_charts(y):
     charts_table = soup.find("table", {"class": "wikitable"})
     # find all `tr` tags
     table_row = charts_table.find_all("tr")
-    # create the dictionary
+    # create the dictionary of years
     years = {}
     # iterate over each table row to extract the <td> tag
     for col in table_row:
         html_col = col.find_all("td")
         if len(html_col) == 7:
-            # create the year key/value(list) pair
+            # create the year key/value(dict) pair like {1985: {}}
             year = html_col[0].text.strip()[0:5]
             years[year] = {}
             i = 1
             while i < 7:
                 if i in (1, 3, 5):
-                    # select only the songs (and not the albums) to feed the dictionary
+                    # select only the songs (and not the albums) to feed the dictionary values
                     if matches := re.search(
                         r'(?:"?(.+)"\[\d.*\](.+)\n)?(.+)\[\d.*\](.+)',
                         html_col[i].text.strip(),
                     ):
                         years[year][f"song_{i}"] = matches.group(3)
                         years[year][f"artist_{i}"] = matches.group(4)
-
+                    # manage key errors:
                     if not f"song_{i}" in years[year].keys():
                         years[year][f"song_{i}"] = "Not found 🙃"
                     if not f"artist_{i}" in years[year].keys():
@@ -118,6 +120,10 @@ def get_charts(y):
                     years[year][f"song_{i}"] = re.sub(
                         r"\[\d+\]", "", years[year][f"song_{i}"]
                     )
+                    # feed the dictionary in that format:
+                    # {'song_1': '"Careless Whisper"', 'artist_1': 'Wham! featuring George Michael',
+                    # 'song_3': '"Rock Me Tonight (For Old Times Sake)"', 'artist_3': 'Freddie Jackson',
+                    # 'song_5': '"Lost in the Fifties Tonight"', 'artist_5': 'Ronnie Milsap'}
                     if years[year][f"song_{i}"][0] != '"':
                         years[year][f"song_{i}"] = '"' + years[year][f"song_{i}"]
                     if years[year][f"song_{i}"][-1] != '"':
@@ -128,6 +134,7 @@ def get_charts(y):
 
 
 def get_lyrics(artist, song):
+    # clean inputs for the API
     cleaned_artist = re.sub(r"\s\(.*\)|/.*", "", artist).strip()
     cleaned_title = re.sub(r"\"|\s\(.*\)|[\(\)]|/.*", "", song).strip()
 
@@ -135,7 +142,7 @@ def get_lyrics(artist, song):
     tokenized = lyricsgenius.Genius(
         "w7Y1kofFOGXkztFMC5gC4SaRzxm24pxZraUU8n902tbu9opjgdkQlh8WHP5BDylB"
     )
-    # retrieving the song's lyrics
+    # retrieve the song's lyrics
     try:
         file = tokenized.search_song(cleaned_title, cleaned_artist)
         if file != None:
@@ -180,6 +187,7 @@ def format_quotes(lyrics, title):
             )
         )
     )
+    # sort quotes by length
     unique_quotes.sort(key=lambda s: len(s))
     return unique_quotes
 
@@ -187,12 +195,14 @@ def format_quotes(lyrics, title):
 def print_quotes(quotes):
     print("")
     if len(quotes) > 0:
+        # create a list of the best quotes
         selected_quotes = []
         for quote in quotes:
             quote[0].upper()
             quote_format = quote.replace("\n", "")
             if quote_format[0] != "(" and len(quote_format.split(" ")) > 2:
                 selected_quotes.append(quote_format)
+        # print the top best quotes of the list (max 4)
         for quote in selected_quotes[:4]:
             print(quote)
     else:

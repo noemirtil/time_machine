@@ -67,26 +67,6 @@ def format_quotes(lyrics, title):
     return unique_quotes
 
 
-def print_quotes(quotes):
-    print("")
-    if len(quotes) > 0:
-        selected_quotes = []
-        for quote in quotes:
-            quote[0].upper()
-            quote_format = quote.replace("\n", "")
-            if quote_format[0] != "(" and len(quote_format.split(" ")) > 2:
-                selected_quotes.append(quote_format)
-        for quote in selected_quotes[:4]:
-            print(quote)
-    else:
-        print("Sorry, this song lacks lyrics 🙃")
-    print(
-        f"""
-~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-            """
-    )
-
-
 # lyrics, title = get_lyrics("Madonna", "Vogue")
 # print_quotes(format_quotes(lyrics, title))
 # print(get_lyrics("Madonna", "Vogue"))
@@ -113,4 +93,54 @@ def print_quotes(quotes):
     )
 
 
-print_quotes(3)
+# print_quotes(3)
+
+
+def get_charts(y):
+    page = wikipedia.page("List_of_Billboard_Year-End_number-one_singles_and_albums")
+    # create a BeautifulSoup Object
+    soup = BeautifulSoup(
+        page.html(),
+        "html.parser",
+    )
+    # find the table we are looking for
+    charts_table = soup.find("table", {"class": "wikitable"})
+    # find all `tr` tags
+    table_row = charts_table.find_all("tr")
+    # create the dictionary of years
+    years = {}
+    # iterate over each table row to extract the <td> tag
+    for col in table_row:
+        html_col = col.find_all("td")
+        if len(html_col) == 7:
+            # create the year key/value(dict) pair like {1985: {}}
+            year = html_col[0].text.strip()[0:5]
+            years[year] = {}
+            i = 1
+            while i < 7:
+                if i in (1, 3, 5):
+                    # select only the songs (and not the albums) to feed the dictionary values
+                    if matches := re.search(
+                        r'(?:"?(.+)"\[\d.*\](.+)\n)?(.+)\[\d.*\](.+)',
+                        html_col[i].text.strip(),
+                    ):
+                        years[year][f"song_{i}"] = matches.group(3)
+                        years[year][f"artist_{i}"] = matches.group(4)
+                    # manage key errors:
+                    if not f"song_{i}" in years[year].keys():
+                        years[year][f"song_{i}"] = "Not found 🙃"
+                    if not f"artist_{i}" in years[year].keys():
+                        years[year][f"artist_{i}"] = "Not found 🙃"
+                    years[year][f"song_{i}"] = re.sub(
+                        r"\[\d+\]", "", years[year][f"song_{i}"]
+                    )
+                    if years[year][f"song_{i}"][0] != '"':
+                        years[year][f"song_{i}"] = '"' + years[year][f"song_{i}"]
+                    if years[year][f"song_{i}"][-1] != '"':
+                        years[year][f"song_{i}"] = years[year][f"song_{i}"] + '"'
+
+                i += 1
+    return years[y]
+
+
+print(get_charts("1985"))
