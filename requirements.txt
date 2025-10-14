@@ -1,2 +1,4 @@
-Any pip-installable libraries that your project requires must be listed,
-one per line, in a file called requirements.txt in the root of your project.
+pip install wikipedia
+pip install requests
+pip install lyricsgenius
+pip install beautifulsoup4

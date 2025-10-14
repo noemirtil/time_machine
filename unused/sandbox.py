@@ -87,5 +87,30 @@ def print_quotes(quotes):
     )
 
 
-lyrics, title = get_lyrics("Madonna", "Vogue")
-print_quotes(format_quotes(lyrics, title))
+# lyrics, title = get_lyrics("Madonna", "Vogue")
+# print_quotes(format_quotes(lyrics, title))
+# print(get_lyrics("Madonna", "Vogue"))
+# print(format_quotes(1, 2))
+
+
+def print_quotes(quotes):
+    print("")
+    if len(quotes) > 0:
+        selected_quotes = []
+        for quote in quotes:
+            quote[0].upper()
+            quote_format = quote.replace("\n", "")
+            if quote_format[0] != "(" and len(quote_format.split(" ")) > 2:
+                selected_quotes.append(quote_format)
+        for quote in selected_quotes[:4]:
+            print(quote)
+    else:
+        print("Sorry, this song lacks lyrics 🙃")
+    print(
+        f"""
+~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+            """
+    )
+
+
+print_quotes(3)
