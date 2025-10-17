@@ -22,6 +22,7 @@ def get_lyrics(artist, song):
     try:
         file = tokenized.search_song(cleaned_title, cleaned_artist)
         if file != None:
+            # print(file.lyrics)
             return file.lyrics, cleaned_title
         else:
             print("Sorry 🙃\n")
@@ -143,4 +144,5 @@ def get_charts(y):
     return years[y]
 
 
-print(get_charts("1985"))
+# print(get_charts("1985"))
+print(get_lyrics('"Careless Whisper"', "Wham! featuring George Michael"))

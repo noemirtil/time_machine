@@ -32,7 +32,7 @@ def test_print_quotes():
     with pytest.raises(TypeError):
         print_quotes()
     with pytest.raises(TypeError):
-        print_quotes(1989)
+        print_quotes(1991)
 
 
 def test_get_lyrics():
@@ -48,7 +48,11 @@ def test_get_charts():
     with pytest.raises(KeyError):
         get_charts("1945")
     with pytest.raises(KeyError):
-        get_charts("2026")
+        get_charts(1943)
+    with pytest.raises(KeyError):
+        get_charts(1965.1)
+    with pytest.raises(KeyError):
+        get_charts(2027)
     with pytest.raises(KeyError):
         get_charts("year")
     with pytest.raises(TypeError):

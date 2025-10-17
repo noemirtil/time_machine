@@ -23,7 +23,7 @@ def interface():
         """
 ==================== TIME MACHINE ====================
 
-Please type a year between 1946 and 2024:
+Please enter a year between 1946 and 2024:
 
 => """
     )
@@ -39,15 +39,15 @@ Please type a year between 1946 and 2024:
                 f"""
 ================= {year} TOP SINGLES =================
 
-Pop charts:
+Nº1 of the Pop charts in {year}:
         {year_charts['song_1']}
         by {year_charts['artist_1']}
 
-R&B/Soul/Hip-Hop charts:
+Nº1 of the R&B/Soul/Hip-Hop charts in {year}:
         {year_charts['song_3']}
         by {year_charts['artist_3']}
 
-Country charts:
+Nº1 of the Country charts in {year}:
         {year_charts['song_5']}
         by {year_charts['artist_5']}
 
@@ -73,8 +73,11 @@ Country charts:
                         print_quotes(format_quotes(lyrics, title))
                     except KeyError:
                         print(f"\nCouldn't retrieve that song's lyrics 🙃\n")
+                    except TypeError:
+                        print(f"\nCouldn't retrieve that song's lyrics 🙃\n")
                 i += 1
-
+            # resetting 'year' variable to avoid query confusion
+            del year
         else:
             interface()
 
@@ -120,8 +123,8 @@ def get_charts(y):
                     years[year][f"song_{i}"] = re.sub(
                         r"\[\d+\]", "", years[year][f"song_{i}"]
                     )
-                    # feed the dictionary in that format:
-                    # {'song_1': '"Careless Whisper"', 'artist_1': 'Wham! featuring George Michael',
+                    # feed the years[year] dictionary in that format:
+                    # 1985: {'song_1': '"Careless Whisper"', 'artist_1': 'Wham! featuring George Michael',
                     # 'song_3': '"Rock Me Tonight (For Old Times Sake)"', 'artist_3': 'Freddie Jackson',
                     # 'song_5': '"Lost in the Fifties Tonight"', 'artist_5': 'Ronnie Milsap'}
                     if years[year][f"song_{i}"][0] != '"':
