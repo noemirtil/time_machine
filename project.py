@@ -72,9 +72,13 @@ Nº1 of the Country charts in {year}:
                         )
                         print_quotes(format_quotes(lyrics, title))
                     except KeyError:
-                        print(f"\nCouldn't retrieve that song's lyrics 🙃\n")
+                        print(
+                            f"\nCouldn't retrieve that song's lyrics 🙃\n~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~\n"
+                        )
                     except TypeError:
-                        print(f"\nCouldn't retrieve that song's lyrics 🙃\n")
+                        print(
+                            f"\nCouldn't retrieve that song's lyrics 🙃\n~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~\n"
+                        )
                 i += 1
             # resetting 'year' variable to avoid query confusion
             del year
@@ -168,30 +172,42 @@ def format_quotes(lyrics, title):
     counted_words = {word: capitalized.count(word) for word in capitalized}
     del counted_words[""]
     # created a sorted by values version of the dictionary
-    sorted_words = dict(
-        sorted(counted_words.items(), key=lambda key_val: key_val[1], reverse=True)
-    )
+    # sorted_words = dict(
+    #     sorted(counted_words.items(), key=lambda key_val: key_val[1], reverse=True)
+    # )
+    # create quotes list with the ones containing the most repeated words
+    quotes = []
+    for word in counted_words:
+        if counted_words[word] > 1 and len(word) > 3:
+            quotes.extend(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
+    # sort quotes by length
+    quotes.sort(key=lambda s: len(s), reverse=True)
     # create a list of the quotes containing the longest word of the title
     longest_title_word = max(title.split(" "), key=len)
-    quotes = re.findall(r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I)
-    # extend quotes list to the ones containing the most repeated words
-    for word in sorted_words:
-        if sorted_words[word] > 3 and len(word) > 4:
-            quotes.extend(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
-    # remove duplicates
-    unique_quotes = list(
-        set(
-            map(
-                str.strip,
-                [
-                    s.replace('"', "").replace(" ,", " ").replace("  ", " ")
-                    for s in quotes
-                ],
-            )
-        )
+    longest_title_word_quotes = re.findall(
+        r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I
     )
-    # sort quotes by length
-    unique_quotes.sort(key=lambda s: len(s))
+    # sort longest_title_word_quotes by length
+    longest_title_word_quotes.sort(key=lambda s: len(s))
+    # longest_title_word_quotes.sort(key=lambda s: len(s), reverse=True)
+    # insert the longest of the longest_title_word_quotes at first index
+    # of quotes to ensure it will be included in the final selection
+    # for q in longest_title_word_quotes:
+    if len(longest_title_word_quotes) > 0:
+        quotes.insert(0, longest_title_word_quotes[0])
+    # print(quotes)
+    # clean the quotes
+    cleaned_quotes = map(
+        str.strip,
+        [s.replace('"', "").replace(" ,", " ").replace("  ", " ") for s in quotes],
+    )
+    # for q in cleaned_quotes:
+    #     print(q)
+    # remove duplicates preserving the order
+    unique_quotes = list(dict.fromkeys(cleaned_quotes))
+    # print(unique_quotes)
+    # for q in unique_quotes:
+    #     print(q)
     return unique_quotes
 
 
@@ -203,10 +219,10 @@ def print_quotes(quotes):
         for quote in quotes:
             quote[0].upper()
             quote_format = quote.replace("\n", "")
-            if quote_format[0] != "(" and len(quote_format.split(" ")) > 2:
+            if quote_format[0] != "(" and len(quote_format.split(" ")) > 1:
                 selected_quotes.append(quote_format)
-        # print the top best quotes of the list (max 4)
-        for quote in selected_quotes[:4]:
+        # print the top best quotes of the list (max 5)
+        for quote in selected_quotes[:5]:
             print(quote)
     else:
         print("Sorry, this song lacks lyrics 🙃")

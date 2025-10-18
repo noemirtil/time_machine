@@ -41,38 +41,40 @@ def format_quotes(lyrics, title):
     # create a dictionary of counted words
     counted_words = {word: capitalized.count(word) for word in capitalized}
     del counted_words[""]
+    # print(counted_words)
     # created a sorted by values version of the dictionary
     sorted_words = dict(
         sorted(counted_words.items(), key=lambda key_val: key_val[1], reverse=True)
     )
-    # print(sorted_words)
-    # create a list of the quotes containing the longest word in the title
-    longest_title_word = max(title.split(" "), key=len)
-    print(longest_title_word)
-    # quotes = re.findall(r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I)
+    print(sorted_words)
+    # create quotes list with the ones containing the most repeated words
     quotes = []
-    # extend quotes list to the most repeated words
-    for word in sorted_words:
-        if sorted_words[word] > 3 and len(word) > 4:
-            quotes.append(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
-    # remove duplicates
+    for word in counted_words:
+        if counted_words[word] > 1 and len(word) > 3:
+            quotes.extend(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
+    # sort quotes by length
+    quotes.sort(key=lambda s: len(s))
+    # create a list of the quotes containing the longest word of the title
+    longest_title_word = max(title.split(" "), key=len)
+    longest_title_word_quotes = re.findall(
+        r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I
+    )
+    # sort longest_title_word_quotes by length
+    longest_title_word_quotes.sort(key=lambda s: len(s))
+    print(longest_title_word_quotes)
+    # insert the shortest of the longest_title_word_quotes at first index
+    # of quotes to ensure it will be included in the final selection
+    # for q in longest_title_word_quotes:
+    if len(longest_title_word_quotes) > 0:
+        quotes.insert(0, longest_title_word_quotes[0])
+    # clean the quotes
     print(quotes)
-    unique_quotes = list(
-        set(
-            map(
-                str.strip,
-                [
-                    s.replace('"', "").replace(" ,", " ").replace("  ", " ")
-                    for s in quotes
-                    if isinstance(s, str)  # Check if s is a string
-                ],
-            )
-        )
+    cleaned_quotes = map(
+        str.strip,
+        [s.replace('"', "").replace(" ,", " ").replace("  ", " ") for s in quotes],
     )
-    unique_quotes.sort(key=lambda s: len(s))
-    unique_quotes.insert(
-        0, re.findall(r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I)
-    )
+    # remove duplicates preserving the order
+    unique_quotes = list(dict.fromkeys(cleaned_quotes))
     print(unique_quotes)
     return unique_quotes
 
@@ -155,7 +157,19 @@ def get_charts(y):
 
 # print(get_charts("1985"))
 # print(get_lyrics("Wham! featuring George Michael", '"Careless Whisper"'))
+# format_quotes(
+#     "[Intro]\nTime can never mend\nThe careless whispers of a good friend\nTo the heart and mind, ignorance is kind\nThere's no comfort in the truth, pain is all you'll find\nShould have known better, yeah\n\n[Instrumental Break]\n\n[Bridge]\nOh, woah, woah, oh\nMm\n\n[Verse 1]\nI feel so unsure\nAs I take your hand and lead you to the dance floor\nAs the music dies, something in your eyes\nCalls to mind a silver screen and all its sad goodbyes\n\n[Chorus]\nI'm never gonna dance again\nGuilty feet have got no rhythm\nThough it's easy to pretend\nI know you're not a fool\nI should have known better than to chеat a friend\nAnd waste the chancе that I'd been given\nSo I'm never gonna dance again\nThe way I danced with you, oh\n\n[Verse 2]\nTime can never mend\nThe careless whispers of a good friend\nTo the heart and mind, ignorance is kind\nThere's no comfort in the truth, pain is all you'll find\n\n[Chorus]\nI'm never gonna dance again\nGuilty feet have got no rhythm\nThough it's easy to pretend\nI know you're not a fool\nI should have known better than to cheat a friend (Shoulda known better, yeah)\nAnd waste the chance that I'd been given\nSo I'm never gonna dance again\nThe way I danced with you, oh\n\n[Post-Chorus]\nNever without your love\n\n[Instrumental Break]\n\n[Verse 3]\nTonight, the music seems so loud\nI wish that we could lose this crowd\nMaybe it's better this way\nWe'd hurt each other with the things we want to say\nWe could have been so good together\nWe could have lived this dance forever\nBut now, who's gonna dance with me?\nPlease stay\n\n[Chorus]\nAnd I'm never gonna dance again\nGuilty feet have got no rhythm\nThough it's easy to pretend\nI know you're not a fool\nI should have known better than to cheat a friend\nAnd waste the chance that I'd been given\nSo I'm never gonna dance again\nThe way I danced with you, oh\n\n[Instrumental Break]\n\n[Outro]\n(Now that you're gone) Now that you're gone\n(Now that you're gone) Was what I did so wrong, so wrong\nThat you had to leave me alone?",
+#     "Careless Whisper",
+# )
+# format_quotes(
+#     "[Verse 1] I can feel the magic floating in the air\nBeing with you gets me that way\nI watch the sunlight dance across your face, and I've\nNever been this swept away\nAll my thoughts just seem to settle on the breeze\nWhen I'm lying wrapped up in your arms\nThe whole world just fades away\nThe only thing I hear\nIs the beating of your heart\n'Cause I can feel you breathe, it's washing over me\nAnd suddenly, I'm melting into you\nThere's nothing left to prove\nBaby, all we need is just to be\nCaught up in the touch, slow and steady rush\nAnd baby, isn't that the way that love's supposed to be?\nI can feel you breathe\nJust breathe\nIn a way, I know my heart is waking up\nAs all the walls come tumbling down\nCloser than I've ever felt before\nAnd I know, and you know\nThere's no need for words right now",
+#     "Breathe",
+# )
 format_quotes(
-    "[Intro]\nTime can never mend\nThe careless whispers of a good friend\nTo the heart and mind, ignorance is kind\nThere's no comfort in the truth, pain is all you'll find\nShould have known better, yeah\n\n[Instrumental Break]\n\n[Bridge]\nOh, woah, woah, oh\nMm\n\n[Verse 1]\nI feel so unsure\nAs I take your hand and lead you to the dance floor\nAs the music dies, something in your eyes\nCalls to mind a silver screen and all its sad goodbyes\n\n[Chorus]\nI'm never gonna dance again\nGuilty feet have got no rhythm\nThough it's easy to pretend\nI know you're not a fool\nI should have known better than to chеat a friend\nAnd waste the chancе that I'd been given\nSo I'm never gonna dance again\nThe way I danced with you, oh\n\n[Verse 2]\nTime can never mend\nThe careless whispers of a good friend\nTo the heart and mind, ignorance is kind\nThere's no comfort in the truth, pain is all you'll find\n\n[Chorus]\nI'm never gonna dance again\nGuilty feet have got no rhythm\nThough it's easy to pretend\nI know you're not a fool\nI should have known better than to cheat a friend (Shoulda known better, yeah)\nAnd waste the chance that I'd been given\nSo I'm never gonna dance again\nThe way I danced with you, oh\n\n[Post-Chorus]\nNever without your love\n\n[Instrumental Break]\n\n[Verse 3]\nTonight, the music seems so loud\nI wish that we could lose this crowd\nMaybe it's better this way\nWe'd hurt each other with the things we want to say\nWe could have been so good together\nWe could have lived this dance forever\nBut now, who's gonna dance with me?\nPlease stay\n\n[Chorus]\nAnd I'm never gonna dance again\nGuilty feet have got no rhythm\nThough it's easy to pretend\nI know you're not a fool\nI should have known better than to cheat a friend\nAnd waste the chance that I'd been given\nSo I'm never gonna dance again\nThe way I danced with you, oh\n\n[Instrumental Break]\n\n[Outro]\n(Now that you're gone) Now that you're gone\n(Now that you're gone) Was what I did so wrong, so wrong\nThat you had to leave me alone?",
-    "Careless Whisper",
+    "All the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nI'd be safe and warm (I'd be safe and warm)\nIf I was in LA (if I was in LA)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nStopped into a church\nI passed along the way\nWell, I got down on my knees (got down on my knees)\nAnd I pretend to pray (I pretend to pray)\nYou know the preacher like the cold (preacher like the cold)\nHe knows I'm gonna stay (knows I'm gonna stay)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nAll the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nIf I didn't tell her (if I didn't tell her)\nI could leave today (I could leave today)\nCalifornia dreamin' (California dreamin')On such a winter's day (California dreamin')\nOn such a winter's day (California dreamin')\nOn such a winter's day",
+    "California Dreamin'",
 )
+# format_quotes(
+#     "Close your eyes, baby\nFollow my heart\nCall on the memories\nHere in the dark\nWe'll let the magic\nTake us away\nBack to the feelings\nWe shared when they played\nIn the still of the night\nHold me, darlin', hold me tight, oh\nSo real, so right\nI'm lost in the fifties tonight\nThese precious hours\nWe know can't survive\nBut love's all that matters\nWhile the past is alive\nNow and for always\nTill time disappears\nWe'll hold each other\nWhenever we hear\nIn the still of the night\nHold me, darlin', hold me tight\nSo real, so right\nI'm lost in the fifties tonight",
+#     "Lost fifties",
+# )
