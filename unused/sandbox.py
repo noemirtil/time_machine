@@ -45,14 +45,18 @@ def format_quotes(lyrics, title):
     sorted_words = dict(
         sorted(counted_words.items(), key=lambda key_val: key_val[1], reverse=True)
     )
+    # print(sorted_words)
     # create a list of the quotes containing the longest word in the title
     longest_title_word = max(title.split(" "), key=len)
-    quotes = re.findall(r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I)
+    print(longest_title_word)
+    # quotes = re.findall(r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I)
+    quotes = []
     # extend quotes list to the most repeated words
     for word in sorted_words:
         if sorted_words[word] > 3 and len(word) > 4:
-            quotes.extend(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
+            quotes.append(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
     # remove duplicates
+    print(quotes)
     unique_quotes = list(
         set(
             map(
@@ -60,11 +64,16 @@ def format_quotes(lyrics, title):
                 [
                     s.replace('"', "").replace(" ,", " ").replace("  ", " ")
                     for s in quotes
+                    if isinstance(s, str)  # Check if s is a string
                 ],
             )
         )
     )
     unique_quotes.sort(key=lambda s: len(s))
+    unique_quotes.insert(
+        0, re.findall(r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I)
+    )
+    print(unique_quotes)
     return unique_quotes
 
 
@@ -145,4 +154,8 @@ def get_charts(y):
 
 
 # print(get_charts("1985"))
-print(get_lyrics('"Careless Whisper"', "Wham! featuring George Michael"))
+# print(get_lyrics("Wham! featuring George Michael", '"Careless Whisper"'))
+format_quotes(
+    "[Intro]\nTime can never mend\nThe careless whispers of a good friend\nTo the heart and mind, ignorance is kind\nThere's no comfort in the truth, pain is all you'll find\nShould have known better, yeah\n\n[Instrumental Break]\n\n[Bridge]\nOh, woah, woah, oh\nMm\n\n[Verse 1]\nI feel so unsure\nAs I take your hand and lead you to the dance floor\nAs the music dies, something in your eyes\nCalls to mind a silver screen and all its sad goodbyes\n\n[Chorus]\nI'm never gonna dance again\nGuilty feet have got no rhythm\nThough it's easy to pretend\nI know you're not a fool\nI should have known better than to chеat a friend\nAnd waste the chancе that I'd been given\nSo I'm never gonna dance again\nThe way I danced with you, oh\n\n[Verse 2]\nTime can never mend\nThe careless whispers of a good friend\nTo the heart and mind, ignorance is kind\nThere's no comfort in the truth, pain is all you'll find\n\n[Chorus]\nI'm never gonna dance again\nGuilty feet have got no rhythm\nThough it's easy to pretend\nI know you're not a fool\nI should have known better than to cheat a friend (Shoulda known better, yeah)\nAnd waste the chance that I'd been given\nSo I'm never gonna dance again\nThe way I danced with you, oh\n\n[Post-Chorus]\nNever without your love\n\n[Instrumental Break]\n\n[Verse 3]\nTonight, the music seems so loud\nI wish that we could lose this crowd\nMaybe it's better this way\nWe'd hurt each other with the things we want to say\nWe could have been so good together\nWe could have lived this dance forever\nBut now, who's gonna dance with me?\nPlease stay\n\n[Chorus]\nAnd I'm never gonna dance again\nGuilty feet have got no rhythm\nThough it's easy to pretend\nI know you're not a fool\nI should have known better than to cheat a friend\nAnd waste the chance that I'd been given\nSo I'm never gonna dance again\nThe way I danced with you, oh\n\n[Instrumental Break]\n\n[Outro]\n(Now that you're gone) Now that you're gone\n(Now that you're gone) Was what I did so wrong, so wrong\nThat you had to leave me alone?",
+    "Careless Whisper",
+)
