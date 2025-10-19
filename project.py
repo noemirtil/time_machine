@@ -37,7 +37,7 @@ Please enter a year between 1946 and 2024:
             # display only the singles, not the albums, that's why the numbers are even:
             print(
                 f"""
-================= {year} TOP SINGLES =================
+================== {year} TOP SINGLES =================
 
 Nº1 of the Pop charts in {year}:
         {year_charts['song_1']}
@@ -163,7 +163,9 @@ def get_lyrics(artist, song):
 
 def format_quotes(lyrics, title):
     # remove the [...] notes
-    cleaned_file = re.sub(r"\[.*\]|\(.*\)|\(\n|\n\)", "", lyrics)
+    cleaned_file = re.sub(
+        r"\[.*\n?.*\n?.*\n?\]|\(.*\n?.*\n?.*\n?\)|\(\n|\n\)", "", lyrics
+    )
     # create a list of words
     split_file = re.split(r"[\s.,;:?()]", cleaned_file)
     # capitalize each word to solve case problems

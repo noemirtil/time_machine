@@ -33,7 +33,8 @@ def get_lyrics(artist, song):
 
 def format_quotes(lyrics, title):
     # remove the [...] notes
-    cleaned_file = re.sub(r"\[.*\]|\(.*\)|\(\n|\n\)", "", lyrics)
+    cleaned_file = re.sub(r"\[.*\n?.*\n?.*\n?\]|\(.*\)|\(\n|\n\)", "", lyrics)
+    print(cleaned_file)
     # create a list of words
     split_file = re.split(r"[\s.,;:?()]", cleaned_file)
     # capitalize each word to solve case problems
@@ -81,6 +82,7 @@ def format_quotes(lyrics, title):
 
 # lyrics, title = get_lyrics("Madonna", "Vogue")
 # print_quotes(format_quotes(lyrics, title))
+
 # print(get_lyrics("Madonna", "Vogue"))
 # print(format_quotes(1, 2))
 
@@ -165,11 +167,13 @@ def get_charts(y):
 #     "[Verse 1] I can feel the magic floating in the air\nBeing with you gets me that way\nI watch the sunlight dance across your face, and I've\nNever been this swept away\nAll my thoughts just seem to settle on the breeze\nWhen I'm lying wrapped up in your arms\nThe whole world just fades away\nThe only thing I hear\nIs the beating of your heart\n'Cause I can feel you breathe, it's washing over me\nAnd suddenly, I'm melting into you\nThere's nothing left to prove\nBaby, all we need is just to be\nCaught up in the touch, slow and steady rush\nAnd baby, isn't that the way that love's supposed to be?\nI can feel you breathe\nJust breathe\nIn a way, I know my heart is waking up\nAs all the walls come tumbling down\nCloser than I've ever felt before\nAnd I know, and you know\nThere's no need for words right now",
 #     "Breathe",
 # )
-format_quotes(
-    "All the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nI'd be safe and warm (I'd be safe and warm)\nIf I was in LA (if I was in LA)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nStopped into a church\nI passed along the way\nWell, I got down on my knees (got down on my knees)\nAnd I pretend to pray (I pretend to pray)\nYou know the preacher like the cold (preacher like the cold)\nHe knows I'm gonna stay (knows I'm gonna stay)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nAll the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nIf I didn't tell her (if I didn't tell her)\nI could leave today (I could leave today)\nCalifornia dreamin' (California dreamin')On such a winter's day (California dreamin')\nOn such a winter's day (California dreamin')\nOn such a winter's day",
-    "California Dreamin'",
-)
+# format_quotes(
+#     "All the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nI'd be safe and warm (I'd be safe and warm)\nIf I was in LA (if I was in LA)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nStopped into a church\nI passed along the way\nWell, I got down on my knees (got down on my knees)\nAnd I pretend to pray (I pretend to pray)\nYou know the preacher like the cold (preacher like the cold)\nHe knows I'm gonna stay (knows I'm gonna stay)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nAll the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nIf I didn't tell her (if I didn't tell her)\nI could leave today (I could leave today)\nCalifornia dreamin' (California dreamin')On such a winter's day (California dreamin')\nOn such a winter's day (California dreamin')\nOn such a winter's day",
+#     "California Dreamin'",
+# )
 # format_quotes(
 #     "Close your eyes, baby\nFollow my heart\nCall on the memories\nHere in the dark\nWe'll let the magic\nTake us away\nBack to the feelings\nWe shared when they played\nIn the still of the night\nHold me, darlin', hold me tight, oh\nSo real, so right\nI'm lost in the fifties tonight\nThese precious hours\nWe know can't survive\nBut love's all that matters\nWhile the past is alive\nNow and for always\nTill time disappears\nWe'll hold each other\nWhenever we hear\nIn the still of the night\nHold me, darlin', hold me tight\nSo real, so right\nI'm lost in the fifties tonight",
 #     "Lost fifties",
 # )
+lyrics, title = get_lyrics("Jack Harlow", "First Class")
+print_quotes(format_quotes(lyrics, title))
