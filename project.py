@@ -164,7 +164,9 @@ def get_lyrics(artist, song):
 def format_quotes(lyrics, title):
     # remove the [...] notes
     cleaned_file = re.sub(
-        r"\[.*\n?.*\n?.*\n?\]|\(.*\n?.*\n?.*\n?\)|\(\n|\n\)", "", lyrics
+        r"\[.*\n?.*\n?.*\n?\]|\(.*?\n?.*?\n?.*?\n?\)|\(\n|\n\)",
+        "",
+        lyrics,
     )
     # create a list of words
     split_file = re.split(r"[\s.,;:?()]", cleaned_file)
@@ -190,11 +192,9 @@ def format_quotes(lyrics, title):
         r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I
     )
     # sort longest_title_word_quotes by length
-    longest_title_word_quotes.sort(key=lambda s: len(s))
-    # longest_title_word_quotes.sort(key=lambda s: len(s), reverse=True)
+    longest_title_word_quotes.sort(key=lambda s: len(s), reverse=True)
     # insert the longest of the longest_title_word_quotes at first index
     # of quotes to ensure it will be included in the final selection
-    # for q in longest_title_word_quotes:
     if len(longest_title_word_quotes) > 0:
         quotes.insert(0, longest_title_word_quotes[0])
     # print(quotes)

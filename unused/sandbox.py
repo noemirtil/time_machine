@@ -25,59 +25,102 @@ def get_lyrics(artist, song):
             # print(file.lyrics)
             return file.lyrics, cleaned_title
         else:
-            print("Sorry 🙃\n")
+            print("Sorry, this song was not found 🙃")
+            return ("", "")
 
     except requests.exceptions.RequestException:
         print("Sorry, this song was not found 🙃\n")
+        return ("", "")
+
+
+def remove_subsets(list):
+    # iterate through the quotes to find subsets of other quotes
+    i = 0
+    while i < len(list):
+        # create a list with the words of the quote
+        split_quote = list[i].split(" ")
+        # set default value for is_substring variable
+        is_substring = False
+        # sub-iteration
+        for quote in list:
+            # pass if sub-iterated quote matches iterated quote
+            if quote == list[i]:
+                pass
+            # if all words of sub-iterated quote match the iterated quote
+            elif all([ele in quote for ele in split_quote]):
+                # then change value for is_substring variable
+                is_substring = True
+                break
+        # remove quote from the list if is_substring variable is True
+        if is_substring:
+            list.remove(list[i])
+            # decrement the index to account for the removed element
+            i -= 1
+        # increment the index to trigger next iteration
+        i += 1
+    return list
 
 
 def format_quotes(lyrics, title):
+    # print(lyrics)
     # remove the [...] notes
-    cleaned_file = re.sub(r"\[.*\n?.*\n?.*\n?\]|\(.*\)|\(\n|\n\)", "", lyrics)
-    print(cleaned_file)
+    cleaned_file = re.sub(
+        r"\[.*\n?.*\n?.*\n?\]|\(.*?\n?.*?\n?.*?\n?\)|\(\n|\n\)",
+        "",
+        lyrics,
+    )
+    print("\n" + cleaned_file)
     # create a list of words
     split_file = re.split(r"[\s.,;:?()]", cleaned_file)
+    # print(split_file)
     # capitalize each word to solve case problems
     capitalized = list(map(str.capitalize, split_file))
     # create a dictionary of counted words
     counted_words = {word: capitalized.count(word) for word in capitalized}
-    del counted_words[""]
     # print(counted_words)
+    del counted_words[""]
     # created a sorted by values version of the dictionary
-    sorted_words = dict(
-        sorted(counted_words.items(), key=lambda key_val: key_val[1], reverse=True)
-    )
-    print(sorted_words)
+    # sorted_words = dict(
+    #     sorted(counted_words.items(), key=lambda key_val: key_val[1], reverse=True)
+    # )
+    # print(sorted_words)
     # create quotes list with the ones containing the most repeated words
     quotes = []
     for word in counted_words:
         if counted_words[word] > 1 and len(word) > 3:
             quotes.extend(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
     # sort quotes by length
-    quotes.sort(key=lambda s: len(s))
+    quotes.sort(key=lambda s: len(s), reverse=True)
     # create a list of the quotes containing the longest word of the title
     longest_title_word = max(title.split(" "), key=len)
     longest_title_word_quotes = re.findall(
         r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I
     )
     # sort longest_title_word_quotes by length
-    longest_title_word_quotes.sort(key=lambda s: len(s))
-    print(longest_title_word_quotes)
-    # insert the shortest of the longest_title_word_quotes at first index
-    # of quotes to ensure it will be included in the final selection
-    # for q in longest_title_word_quotes:
+    longest_title_word_quotes.sort(key=lambda s: len(s), reverse=True)
+    # print(longest_title_word_quotes)
+    # append the longest of the longest_title_word_quotes to quotes list
     if len(longest_title_word_quotes) > 0:
-        quotes.insert(0, longest_title_word_quotes[0])
+        quotes.append(longest_title_word_quotes[0])
+    # print(quotes)
     # clean the quotes
-    print(quotes)
-    cleaned_quotes = map(
-        str.strip,
-        [s.replace('"', "").replace(" ,", " ").replace("  ", " ") for s in quotes],
+    cleaned_quotes = list(
+        map(
+            str.strip,
+            [s.replace('"', "").replace(" ,", " ").replace("  ", " ") for s in quotes],
+        )
     )
-    # remove duplicates preserving the order
-    unique_quotes = list(dict.fromkeys(cleaned_quotes))
-    print(unique_quotes)
-    return unique_quotes
+    # create a dictionary of counted quotes
+    counted_quotes = {quote: cleaned_quotes.count(quote) for quote in cleaned_quotes}
+    # print(counted_quotes)
+    # created a sorted by values list from the dictionary
+    sorted_quotes = []
+    for quote, n in sorted(
+        counted_quotes.items(), key=lambda key_val: key_val[1], reverse=True
+    ):
+        sorted_quotes.append(quote)
+    # print(remove_subsets(sorted_quotes))
+    return remove_subsets(sorted_quotes)
 
 
 # lyrics, title = get_lyrics("Madonna", "Vogue")
@@ -94,9 +137,9 @@ def print_quotes(quotes):
         for quote in quotes:
             quote[0].upper()
             quote_format = quote.replace("\n", "")
-            if quote_format[0] != "(" and len(quote_format.split(" ")) > 2:
+            if quote_format[0] != "(" and len(quote_format.split(" ")) > 1:
                 selected_quotes.append(quote_format)
-        for quote in selected_quotes[:4]:
+        for quote in selected_quotes[:5]:
             print(quote)
     else:
         print("Sorry, this song lacks lyrics 🙃")
@@ -167,13 +210,18 @@ def get_charts(y):
 #     "[Verse 1] I can feel the magic floating in the air\nBeing with you gets me that way\nI watch the sunlight dance across your face, and I've\nNever been this swept away\nAll my thoughts just seem to settle on the breeze\nWhen I'm lying wrapped up in your arms\nThe whole world just fades away\nThe only thing I hear\nIs the beating of your heart\n'Cause I can feel you breathe, it's washing over me\nAnd suddenly, I'm melting into you\nThere's nothing left to prove\nBaby, all we need is just to be\nCaught up in the touch, slow and steady rush\nAnd baby, isn't that the way that love's supposed to be?\nI can feel you breathe\nJust breathe\nIn a way, I know my heart is waking up\nAs all the walls come tumbling down\nCloser than I've ever felt before\nAnd I know, and you know\nThere's no need for words right now",
 #     "Breathe",
 # )
-# format_quotes(
-#     "All the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nI'd be safe and warm (I'd be safe and warm)\nIf I was in LA (if I was in LA)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nStopped into a church\nI passed along the way\nWell, I got down on my knees (got down on my knees)\nAnd I pretend to pray (I pretend to pray)\nYou know the preacher like the cold (preacher like the cold)\nHe knows I'm gonna stay (knows I'm gonna stay)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nAll the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nIf I didn't tell her (if I didn't tell her)\nI could leave today (I could leave today)\nCalifornia dreamin' (California dreamin')On such a winter's day (California dreamin')\nOn such a winter's day (California dreamin')\nOn such a winter's day",
-#     "California Dreamin'",
-# )
+print_quotes(
+    format_quotes(
+        "All the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nI'd be safe and warm (I'd be safe and warm)\nIf I was in LA (if I was in LA)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nStopped into a church\nI passed along the way\nWell, I got down on my knees (got down on my knees)\nAnd I pretend to pray (I pretend to pray)\nYou know the preacher like the cold (preacher like the cold)\nHe knows I'm gonna stay (knows I'm gonna stay)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nAll the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nIf I didn't tell her (if I didn't tell her)\nI could leave today (I could leave today)\nCalifornia dreamin' (California dreamin')On such a winter's day (California dreamin')\nOn such a winter's day (California dreamin')\nOn such a winter's day",
+        "California Dreamin'",
+    )
+)
 # format_quotes(
 #     "Close your eyes, baby\nFollow my heart\nCall on the memories\nHere in the dark\nWe'll let the magic\nTake us away\nBack to the feelings\nWe shared when they played\nIn the still of the night\nHold me, darlin', hold me tight, oh\nSo real, so right\nI'm lost in the fifties tonight\nThese precious hours\nWe know can't survive\nBut love's all that matters\nWhile the past is alive\nNow and for always\nTill time disappears\nWe'll hold each other\nWhenever we hear\nIn the still of the night\nHold me, darlin', hold me tight\nSo real, so right\nI'm lost in the fifties tonight",
 #     "Lost fifties",
 # )
-lyrics, title = get_lyrics("Jack Harlow", "First Class")
-print_quotes(format_quotes(lyrics, title))
+# lyrics, title = get_lyrics("Jack Harlow", "First Class")
+# lyrics, title = get_lyrics("ssdfghdfghdfghdgf", "ddfghdfghdfghsfgdhfdg")
+# lyrics, title = get_lyrics("mamas papas", "California Dreamin'")
+# lyrics, title = get_lyrics("Wham! featuring George Michael", '"Careless Whisper"')
+# print_quotes(format_quotes(lyrics, title))
