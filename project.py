@@ -155,30 +155,65 @@ def get_lyrics(artist, song):
         if file != None:
             return file.lyrics, cleaned_title
         else:
-            print("Sorry 🙃\n")
+            print("Sorry, this song was not found 🙃")
+            return ("", "")
 
     except requests.exceptions.RequestException:
         print("Sorry, this song was not found 🙃\n")
+        return ("", "")
+
+
+def remove_subsets(list):
+    # iterate through the quotes to find subsets of other quotes
+    i = 0
+    while i < len(list):
+        # create a list with the words of the quote
+        split_quote = list[i].split(" ")
+        # set default value for is_substring variable
+        is_substring = False
+        # sub-iteration
+        for quote in list:
+            # pass if sub-iterated quote matches iterated quote
+            if quote == list[i]:
+                pass
+            # if all words of sub-iterated quote match the iterated quote
+            elif all([ele in quote for ele in split_quote]):
+                # then change value for is_substring variable
+                is_substring = True
+                break
+        # remove quote from the list if is_substring variable is True
+        if is_substring:
+            list.remove(list[i])
+            # decrement the index to account for the removed element
+            i -= 1
+        # increment the index to trigger next iteration
+        i += 1
+    return list
 
 
 def format_quotes(lyrics, title):
+    # print(lyrics)
     # remove the [...] notes
     cleaned_file = re.sub(
         r"\[.*\n?.*\n?.*\n?\]|\(.*?\n?.*?\n?.*?\n?\)|\(\n|\n\)",
         "",
         lyrics,
     )
+    # print("\n" + cleaned_file)
     # create a list of words
     split_file = re.split(r"[\s.,;:?()]", cleaned_file)
+    # print(split_file)
     # capitalize each word to solve case problems
     capitalized = list(map(str.capitalize, split_file))
     # create a dictionary of counted words
     counted_words = {word: capitalized.count(word) for word in capitalized}
+    # print(counted_words)
     del counted_words[""]
     # created a sorted by values version of the dictionary
     # sorted_words = dict(
     #     sorted(counted_words.items(), key=lambda key_val: key_val[1], reverse=True)
     # )
+    # print(sorted_words)
     # create quotes list with the ones containing the most repeated words
     quotes = []
     for word in counted_words:
@@ -193,24 +228,29 @@ def format_quotes(lyrics, title):
     )
     # sort longest_title_word_quotes by length
     longest_title_word_quotes.sort(key=lambda s: len(s), reverse=True)
-    # insert the longest of the longest_title_word_quotes at first index
-    # of quotes to ensure it will be included in the final selection
+    # print(longest_title_word_quotes)
+    # append the longest of the longest_title_word_quotes to quotes list
     if len(longest_title_word_quotes) > 0:
-        quotes.insert(0, longest_title_word_quotes[0])
+        quotes.append(longest_title_word_quotes[0])
     # print(quotes)
     # clean the quotes
-    cleaned_quotes = map(
-        str.strip,
-        [s.replace('"', "").replace(" ,", " ").replace("  ", " ") for s in quotes],
+    cleaned_quotes = list(
+        map(
+            str.strip,
+            [s.replace('"', "").replace(" ,", " ").replace("  ", " ") for s in quotes],
+        )
     )
-    # for q in cleaned_quotes:
-    #     print(q)
-    # remove duplicates preserving the order
-    unique_quotes = list(dict.fromkeys(cleaned_quotes))
-    # print(unique_quotes)
-    # for q in unique_quotes:
-    #     print(q)
-    return unique_quotes
+    # create a dictionary of counted quotes
+    counted_quotes = {quote: cleaned_quotes.count(quote) for quote in cleaned_quotes}
+    # print(counted_quotes)
+    # created a sorted by values list from the dictionary
+    sorted_quotes = []
+    for quote, n in sorted(
+        counted_quotes.items(), key=lambda key_val: key_val[1], reverse=True
+    ):
+        sorted_quotes.append(quote)
+    # print(remove_subsets(sorted_quotes))
+    return remove_subsets(sorted_quotes)
 
 
 def print_quotes(quotes):
