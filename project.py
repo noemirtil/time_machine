@@ -52,7 +52,7 @@ Nº1 of the Country charts in {year}:
         by {year_charts['artist_5']}
 
 
-    ====    Here are some characteristic    ====
+    ====     Here are some significant      ====
     ====     quotes from these 3 songs:     ====
 
 """
@@ -89,7 +89,7 @@ Nº1 of the Country charts in {year}:
         interface()
 
 
-def get_charts(y):
+def get_charts(year_of_interest):
     page = wikipedia.page("List_of_Billboard_Year-End_number-one_singles_and_albums")
     # create a BeautifulSoup Object
     soup = BeautifulSoup(
@@ -137,7 +137,7 @@ def get_charts(y):
                         years[year][f"song_{i}"] = years[year][f"song_{i}"] + '"'
 
                 i += 1
-    return years[y]
+    return years[year_of_interest]
 
 
 def get_lyrics(artist, song):
@@ -168,16 +168,19 @@ def remove_subsets(list):
     i = 0
     while i < len(list):
         # create a list with the words of the quote
-        split_quote = list[i].split(" ")
+        # split_quote = list[i].split(" ")
+        split_quote = [word.lower().replace(",", "") for word in list[i].split(" ")]
         # set default value for is_substring variable
         is_substring = False
         # sub-iteration
         for quote in list:
+            # list all quote's words
+            words = [word.lower().replace(",", "") for word in quote.split(" ")]
             # pass if sub-iterated quote matches iterated quote
             if quote == list[i]:
                 pass
             # if all words of sub-iterated quote match the iterated quote
-            elif all([ele in quote for ele in split_quote]):
+            elif all([ele in words for ele in split_quote]):
                 # then change value for is_substring variable
                 is_substring = True
                 break

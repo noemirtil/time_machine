@@ -38,16 +38,19 @@ def remove_subsets(list):
     i = 0
     while i < len(list):
         # create a list with the words of the quote
-        split_quote = list[i].split(" ")
+        # split_quote = list[i].split(" ")
+        split_quote = [word.lower().replace(",", "") for word in list[i].split(" ")]
         # set default value for is_substring variable
         is_substring = False
         # sub-iteration
         for quote in list:
+            # list all quote's words
+            words = [word.lower().replace(",", "") for word in quote.split(" ")]
             # pass if sub-iterated quote matches iterated quote
             if quote == list[i]:
                 pass
             # if all words of sub-iterated quote match the iterated quote
-            elif all([ele in quote for ele in split_quote]):
+            elif all([ele in words for ele in split_quote]):
                 # then change value for is_substring variable
                 is_substring = True
                 break
@@ -69,7 +72,7 @@ def format_quotes(lyrics, title):
         "",
         lyrics,
     )
-    print("\n" + cleaned_file)
+    # print("\n" + cleaned_file)
     # create a list of words
     split_file = re.split(r"[\s.,;:?()]", cleaned_file)
     # print(split_file)
@@ -119,8 +122,10 @@ def format_quotes(lyrics, title):
         counted_quotes.items(), key=lambda key_val: key_val[1], reverse=True
     ):
         sorted_quotes.append(quote)
+    # print(sorted_quotes)
     # print(remove_subsets(sorted_quotes))
     return remove_subsets(sorted_quotes)
+    # return sorted_quotes
 
 
 # lyrics, title = get_lyrics("Madonna", "Vogue")
@@ -153,7 +158,7 @@ def print_quotes(quotes):
 # print_quotes(3)
 
 
-def get_charts(y):
+def get_charts(year_of_interest):
     page = wikipedia.page("List_of_Billboard_Year-End_number-one_singles_and_albums")
     # create a BeautifulSoup Object
     soup = BeautifulSoup(
@@ -197,7 +202,7 @@ def get_charts(y):
                         years[year][f"song_{i}"] = years[year][f"song_{i}"] + '"'
 
                 i += 1
-    return years[y]
+    return years[year_of_interest]
 
 
 # print(get_charts("1985"))
@@ -210,18 +215,19 @@ def get_charts(y):
 #     "[Verse 1] I can feel the magic floating in the air\nBeing with you gets me that way\nI watch the sunlight dance across your face, and I've\nNever been this swept away\nAll my thoughts just seem to settle on the breeze\nWhen I'm lying wrapped up in your arms\nThe whole world just fades away\nThe only thing I hear\nIs the beating of your heart\n'Cause I can feel you breathe, it's washing over me\nAnd suddenly, I'm melting into you\nThere's nothing left to prove\nBaby, all we need is just to be\nCaught up in the touch, slow and steady rush\nAnd baby, isn't that the way that love's supposed to be?\nI can feel you breathe\nJust breathe\nIn a way, I know my heart is waking up\nAs all the walls come tumbling down\nCloser than I've ever felt before\nAnd I know, and you know\nThere's no need for words right now",
 #     "Breathe",
 # )
-print_quotes(
-    format_quotes(
-        "All the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nI'd be safe and warm (I'd be safe and warm)\nIf I was in LA (if I was in LA)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nStopped into a church\nI passed along the way\nWell, I got down on my knees (got down on my knees)\nAnd I pretend to pray (I pretend to pray)\nYou know the preacher like the cold (preacher like the cold)\nHe knows I'm gonna stay (knows I'm gonna stay)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nAll the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nIf I didn't tell her (if I didn't tell her)\nI could leave today (I could leave today)\nCalifornia dreamin' (California dreamin')On such a winter's day (California dreamin')\nOn such a winter's day (California dreamin')\nOn such a winter's day",
-        "California Dreamin'",
-    )
-)
+# print_quotes(
+#     format_quotes(
+#         "All the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nI'd be safe and warm (I'd be safe and warm)\nIf I was in LA (if I was in LA)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nStopped into a church\nI passed along the way\nWell, I got down on my knees (got down on my knees)\nAnd I pretend to pray (I pretend to pray)\nYou know the preacher like the cold (preacher like the cold)\nHe knows I'm gonna stay (knows I'm gonna stay)\nCalifornia dreamin' (California dreamin')\nOn such a winter's day\nAll the leaves are brown (all the leaves are brown)\nAnd the sky is gray (and the sky is gray)\nI've been for a walk (I've been for a walk)\nOn a winter's day (on a winter's day)\nIf I didn't tell her (if I didn't tell her)\nI could leave today (I could leave today)\nCalifornia dreamin' (California dreamin')On such a winter's day (California dreamin')\nOn such a winter's day (California dreamin')\nOn such a winter's day",
+#         "California Dreamin'",
+#     )
+# )
 # format_quotes(
 #     "Close your eyes, baby\nFollow my heart\nCall on the memories\nHere in the dark\nWe'll let the magic\nTake us away\nBack to the feelings\nWe shared when they played\nIn the still of the night\nHold me, darlin', hold me tight, oh\nSo real, so right\nI'm lost in the fifties tonight\nThese precious hours\nWe know can't survive\nBut love's all that matters\nWhile the past is alive\nNow and for always\nTill time disappears\nWe'll hold each other\nWhenever we hear\nIn the still of the night\nHold me, darlin', hold me tight\nSo real, so right\nI'm lost in the fifties tonight",
 #     "Lost fifties",
 # )
 # lyrics, title = get_lyrics("Jack Harlow", "First Class")
+lyrics, title = get_lyrics("The Beach Boys", "Surfin' U.S.A.")
 # lyrics, title = get_lyrics("ssdfghdfghdfghdgf", "ddfghdfghdfghsfgdhfdg")
 # lyrics, title = get_lyrics("mamas papas", "California Dreamin'")
 # lyrics, title = get_lyrics("Wham! featuring George Michael", '"Careless Whisper"')
-# print_quotes(format_quotes(lyrics, title))
+print_quotes(format_quotes(lyrics, title))
