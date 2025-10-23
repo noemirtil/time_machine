@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 
-# import re
+import re
+from collections import Counter
 
 # cleaned_file = """
 # Mm
@@ -300,13 +301,28 @@
 # print_quotes(format_quotes("First Class"))
 
 sorted_quotes = [
-    "I've been for a walk",
-    "California dreamin' On such a winter's day",
-    "On such a winter's day",
-    "California dreamin'",
-    "All the leaves are brown",
-    "And the sky is gray",
-    "On a winter's day",
+    "I lose control",
+    "Yeah, you're breakin' my heart, baby",
+    "I'm fallin' apart right in front of you, can't you see?",
+    "When you're not next to me, mhm",
+    "When you're not next to me",
+    "I’m fallin' apart right in front of you, can’t you see?",
+    "When you're not here with me, mhm",
+    "When you're not here with me, mm",
+    "Problematic",
+    "Problem is I want your body like a fiend, like a bad habit",
+    "From tearin' the skin off my bones, don't you know",
+    "And I need some relief, my skin in your teeth",
+    "Problem is when I'm with you, I'm an addict",
+    "Bad habits hard to break when I’m with you",
+    "Yeah, I know I can do it on my own",
+    "You make a mess of me, yeah",
+    "You make a mess of me",
+    "But I want that real full-moon black magic and it takes two",
+    "Yeah, it's taken a toll on me, tryin' my best to keep",
+    "Feels like the walls are all closin' in",
+    "Can't see the forest through the trees",
+    "No, I don’t know myself anymore",
 ]
 
 
@@ -315,16 +331,18 @@ def remove_subsets(list):
     i = 0
     while i < len(list):
         # create a list with the words of the quote
-        split_quote = list[i].split(" ")
+        split_quote = [word.lower().replace(",", "") for word in list[i].split(" ")]
         # set default value for is_substring variable
         is_substring = False
         # sub-iteration
         for quote in list:
+            # list all quote's words
+            words = [word.lower().replace(",", "") for word in quote.split(" ")]
             # pass if sub-iterated quote matches iterated quote
             if quote == list[i]:
                 pass
-            # if all words of sub-iterated quote match the iterated quote
-            elif all([ele in quote for ele in split_quote]):
+            # if all (or all but one) words of sub-iterated quote match iterated quote
+            elif sum(w not in words for w in split_quote) < 2:
                 # then change value for is_substring variable
                 is_substring = True
                 break
@@ -338,5 +356,76 @@ def remove_subsets(list):
     return list
 
 
-for quote in remove_subsets(sorted_quotes):
-    print(quote)
+# for quote in remove_subsets(sorted_quotes):
+#     print(quote)
+
+
+def format_quotes(lyrics, title):
+    # print(lyrics)
+    # remove the [...] and (...) notes
+    cleaned_file = re.sub(
+        r"\[.*\n?.*\n?.*\n?\]|\(.*?\n?.*?\n?.*?\n?\)|\(\n|\n\)",
+        "",
+        lyrics,
+    )
+    # print("\n" + cleaned_file)
+    # create a list of words
+    split_file = re.split(r"[\s.,;:?()]", cleaned_file)
+    # print(split_file)
+    # capitalize each word to solve case problems
+    capitalized = list(map(str.capitalize, split_file))
+    # create a dictionary of counted words
+    counted_words = {word: capitalized.count(word) for word in capitalized}
+    # print(counted_words)
+    del counted_words[""]
+    # create quotes list with the ones containing the most repeated words
+    quotes = []
+    for word in counted_words:
+        if counted_words[word] > 1 and len(word) > 3:
+            quotes.extend(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
+    # if any quote exceeds 68 characters, remove it from the list
+    quotes = [quote for quote in quotes if len(quote) < 68]
+    # sort quotes by length
+    quotes.sort(key=lambda s: len(s), reverse=True)
+    # create a list of the quotes containing significant words of the title
+    title_words = [word for word in title.split(" ") if len(word) > 3]
+    title_words_quotes = []
+    for word in title_words:
+        title_words_quotes.extend(
+            re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I)
+        )
+    # append title_word_quotes to quotes list
+    for quote in title_words_quotes:
+        # print(quote)
+        quotes.append(quote)
+    # print(quotes)
+    # clean the quotes
+    cleaned_quotes = list(
+        map(
+            str.strip,
+            [
+                s.replace('"', "")
+                .replace(" ,", " ")
+                .replace("  ", " ")
+                .replace("\u205f", " ")
+                .replace("’", "'")
+                for s in quotes
+            ],
+        )
+    )
+    # create a list of sorted quotes
+    sorted_quotes = []
+    # count occurences of each quotes, return an ordered list
+    for quote, occurs in Counter(cleaned_quotes).most_common():
+        sorted_quotes.append(quote)
+    # print(sorted_quotes)
+    # print(remove_subsets(sorted_quotes))
+    return remove_subsets(sorted_quotes)
+
+
+print(
+    format_quotes(
+        "[Produced by Shep Pettibone and Madonna]\n\n[Intro]\nStrike a pose\nStrike a pose\nVogue (Vogue, vogue)\nVogue (Vogue, vogue)\n\n[Verse 1]\nLook around, everywhere you turn is heartache\nIt's everywhere that you go (Look around)\nYou try everything you can to escape\nThe pain of life that you know (Life that you know)\nWhen all else fails and you long to be\nSomething better than you are today\nI know a place where you can get away\nIt's called a dance floor\nAnd here's what it's for, so\n\n[Chorus]\nCome on, vogue (Vogue)\nLet your body move to the music (Move to the music)\nHey, hey, hey\nCome on, vogue (Vogue)\nLet your body go with the flow (Go with the flow)\nYou know you can do it\n\n[Verse 2]\nAll you need is your own imagination\nSo use it, that's what it's for (That's what it's for)\nGo inside for your finest inspiration\nYour dreams will open the door (Open up the door)\nIt makes no difference if you're black or white\nIf you're a boy or a girl\nIf the music's pumping, it will give you new life\nYou're a superstar\nYes, that's what you are, you know it\n\n[Chorus]\nCome on, vogue (Vogue, vogue)\nLet your body groove to the music (Groove to the music)\nHey, hey, hey\nCome on, vogue (Vogue, vogue)\nLet your body go with the flow (Go with the flow)\nYou know you can do it\n\n[Bridge]\nBeauty's where you find it\nNot just where you bump and grind it\nSoul is in the musical\nThat's where I feel so beautiful\nMagical, life's a ball, so\nGet up on the dance floor\n\n[Chorus]\nVogue (Vogue)\nLet your body move to the music (Move to the music)\nHey, hey, hey\nCome on, vogue (Vogue, vogue)\nLet your body go with the flow (Go with the flow)\nYou know you can do it\n\n[Refrain]\nVogue (Vogue)\nBeauty's where you find it (Move to the music)\nVogue (Vogue)\nBeauty's where you find it (Go with the flow)\n\n[Verse 3]\nGreta Garbo, and Monroe\nDietrich and DiMaggio\nMarlon Brando, Jimmy Dean\nOn the cover of a magazine\nGrace Kelly, Harlow, Jean\nPicture of a beauty queen\nGene Kelly, Fred Astaire\nGinger Rogers dance on air\nThey had style, they had grace\nRita Hayworth gave good face\nLauren, Katharine, Lana too\nBette Davis, we love you\nLadies with an attitude\nFellas that were in the mood\nDon't just stand there, let's get to it\nStrike a pose, there's nothing to it\nVogue\nVogue\n\n[Outro]\nOoh, you've got to\nLet your body move to the music\nOoh, you've got to just\nLet your body go with the flow\nOoh, you've got to\nVogue (Vogue, vogue, vogue)",
+        "Vogue",
+    )
+)

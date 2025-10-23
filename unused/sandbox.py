@@ -8,9 +8,11 @@ import wikipedia
 import requests
 import lyricsgenius
 from bs4 import BeautifulSoup
+from collections import Counter
 
 
 def get_lyrics(artist, song):
+    # clean inputs for the API
     cleaned_artist = re.sub(r"\s\(.*\)|/.*", "", artist).strip()
     cleaned_title = re.sub(r"\"|\s\(.*\)|[\(\)]|/.*", "", song).strip()
 
@@ -18,7 +20,7 @@ def get_lyrics(artist, song):
     tokenized = lyricsgenius.Genius(
         "w7Y1kofFOGXkztFMC5gC4SaRzxm24pxZraUU8n902tbu9opjgdkQlh8WHP5BDylB"
     )
-    # retrieving the song's lyrics
+    # retrieve the song's lyrics
     try:
         file = tokenized.search_song(cleaned_title, cleaned_artist)
         if file != None:
@@ -34,11 +36,11 @@ def get_lyrics(artist, song):
 
 
 def remove_subsets(list):
+    # print(list)
     # iterate through the quotes to find subsets of other quotes
     i = 0
     while i < len(list):
         # create a list with the words of the quote
-        # split_quote = list[i].split(" ")
         split_quote = [word.lower().replace(",", "") for word in list[i].split(" ")]
         # set default value for is_substring variable
         is_substring = False
@@ -49,8 +51,10 @@ def remove_subsets(list):
             # pass if sub-iterated quote matches iterated quote
             if quote == list[i]:
                 pass
-            # if all words of sub-iterated quote match the iterated quote
-            elif all([ele in words for ele in split_quote]):
+            # if all (or all but one) words of sub-iterated quote match iterated quote
+            elif sum(w not in words for w in split_quote) < 2:
+                print(quote)
+                # print([w not in words for w in split_quote])
                 # then change value for is_substring variable
                 is_substring = True
                 break
@@ -61,12 +65,13 @@ def remove_subsets(list):
             i -= 1
         # increment the index to trigger next iteration
         i += 1
+    print(list)
     return list
 
 
 def format_quotes(lyrics, title):
     # print(lyrics)
-    # remove the [...] notes
+    # remove the [...] and (...) notes
     cleaned_file = re.sub(
         r"\[.*\n?.*\n?.*\n?\]|\(.*?\n?.*?\n?.*?\n?\)|\(\n|\n\)",
         "",
@@ -82,50 +87,49 @@ def format_quotes(lyrics, title):
     counted_words = {word: capitalized.count(word) for word in capitalized}
     # print(counted_words)
     del counted_words[""]
-    # created a sorted by values version of the dictionary
-    # sorted_words = dict(
-    #     sorted(counted_words.items(), key=lambda key_val: key_val[1], reverse=True)
-    # )
-    # print(sorted_words)
     # create quotes list with the ones containing the most repeated words
     quotes = []
     for word in counted_words:
         if counted_words[word] > 1 and len(word) > 3:
             quotes.extend(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
+    # if any quote exceeds 68 characters, remove it from the list
+    quotes = [quote for quote in quotes if len(quote) < 68]
     # sort quotes by length
     quotes.sort(key=lambda s: len(s), reverse=True)
-    # create a list of the quotes containing the longest word of the title
-    longest_title_word = max(title.split(" "), key=len)
-    longest_title_word_quotes = re.findall(
-        r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I
-    )
-    # sort longest_title_word_quotes by length
-    longest_title_word_quotes.sort(key=lambda s: len(s), reverse=True)
-    # print(longest_title_word_quotes)
-    # append the longest of the longest_title_word_quotes to quotes list
-    if len(longest_title_word_quotes) > 0:
-        quotes.append(longest_title_word_quotes[0])
+    # create a list of the quotes containing significant words of the title
+    title_words = [word for word in title.split(" ") if len(word) > 3]
+    title_words_quotes = []
+    for word in title_words:
+        title_words_quotes.extend(
+            re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I)
+        )
+    # append title_word_quotes to quotes list
+    for quote in title_words_quotes:
+        # print(quote)
+        quotes.append(quote)
     # print(quotes)
     # clean the quotes
     cleaned_quotes = list(
         map(
             str.strip,
-            [s.replace('"', "").replace(" ,", " ").replace("  ", " ") for s in quotes],
+            [
+                s.replace('"', "")
+                .replace(" ,", " ")
+                .replace("  ", " ")
+                .replace("\u205f", " ")
+                .replace("’", "'")
+                for s in quotes
+            ],
         )
     )
-    # create a dictionary of counted quotes
-    counted_quotes = {quote: cleaned_quotes.count(quote) for quote in cleaned_quotes}
-    # print(counted_quotes)
-    # created a sorted by values list from the dictionary
+    # create a list of sorted quotes
     sorted_quotes = []
-    for quote, n in sorted(
-        counted_quotes.items(), key=lambda key_val: key_val[1], reverse=True
-    ):
+    # count occurences of each quotes, return an ordered list
+    for quote, occurs in Counter(cleaned_quotes).most_common():
         sorted_quotes.append(quote)
-    # print(sorted_quotes)
+    print(sorted_quotes)
     # print(remove_subsets(sorted_quotes))
     return remove_subsets(sorted_quotes)
-    # return sorted_quotes
 
 
 # lyrics, title = get_lyrics("Madonna", "Vogue")
@@ -226,8 +230,12 @@ def get_charts(year_of_interest):
 #     "Lost fifties",
 # )
 # lyrics, title = get_lyrics("Jack Harlow", "First Class")
-lyrics, title = get_lyrics("The Beach Boys", "Surfin' U.S.A.")
+# lyrics, title = get_lyrics("Coolio", "Gangsta's Paradise")
+# lyrics, title = get_lyrics("Chicago", "Look Away")
+# lyrics, title = get_lyrics("Teddy Swims", "Lose control")
+# lyrics, title = get_lyrics("Morgan Wallen", "Wasted on you")
+# lyrics, title = get_lyrics("The Beach Boys", "Surfin' U.S.A.")
 # lyrics, title = get_lyrics("ssdfghdfghdfghdgf", "ddfghdfghdfghsfgdhfdg")
-# lyrics, title = get_lyrics("mamas papas", "California Dreamin'")
+lyrics, title = get_lyrics("mamas papas", "California Dreamin'")
 # lyrics, title = get_lyrics("Wham! featuring George Michael", '"Careless Whisper"')
 print_quotes(format_quotes(lyrics, title))
