@@ -2,12 +2,13 @@
 
 import sys
 import os
-import platform
 import re
 import wikipedia
 import requests
 import lyricsgenius
 from bs4 import BeautifulSoup
+from collections import Counter
+from subprocess import call
 
 
 def main():
@@ -18,22 +19,33 @@ def main():
 
 
 def interface():
-    screen_clean()
+    call("clear" if os.name == "posix" else "cls")
     year = input(
         """
 ==================== TIME MACHINE ====================
 
+    CS50 final project by Noémie Baudouin
+    https://github.com/noemirtil
+    edX username: 2508_4BEG
+    Barcelona, Spain - Friday, October 24, 2025
+
 Please enter a year between 1946 and 2024:
 
-=> """
+==> """
     )
     # get that year's top charts from Wikipedia
     try:
         if 1945 < int(year) < 2025:
-            print("\nRetrieving data...\n")
+            print(
+                """
+    Retrieving data...
+
+    ⏳(usually takes up to 23 seconds)
+"""
+            )
             year_charts = get_charts(year)
 
-            screen_clean()
+            call("clear" if os.name == "posix" else "cls")
             # display only the singles, not the albums, that's why the numbers are even:
             print(
                 f"""
@@ -52,7 +64,7 @@ Nº1 of the Country charts in {year}:
         by {year_charts['artist_5']}
 
 
-    ====    Here are some characteristic    ====
+    ====     Here are some significant      ====
     ====     quotes from these 3 songs:     ====
 
 """
@@ -80,7 +92,7 @@ Nº1 of the Country charts in {year}:
                             f"\nCouldn't retrieve that song's lyrics 🙃\n~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~\n"
                         )
                 i += 1
-            # resetting 'year' variable to avoid query confusion
+            # resetting 'year' variable to avoid query confusion for next intent
             del year
         else:
             interface()
@@ -89,7 +101,7 @@ Nº1 of the Country charts in {year}:
         interface()
 
 
-def get_charts(y):
+def get_charts(year_of_interest):
     page = wikipedia.page("List_of_Billboard_Year-End_number-one_singles_and_albums")
     # create a BeautifulSoup Object
     soup = BeautifulSoup(
@@ -137,11 +149,11 @@ def get_charts(y):
                         years[year][f"song_{i}"] = years[year][f"song_{i}"] + '"'
 
                 i += 1
-    return years[y]
+    return years[year_of_interest]
 
 
 def get_lyrics(artist, song):
-    # clean inputs for the API
+    # clean variables for the API
     cleaned_artist = re.sub(r"\s\(.*\)|/.*", "", artist).strip()
     cleaned_title = re.sub(r"\"|\s\(.*\)|[\(\)]|/.*", "", song).strip()
 
@@ -155,16 +167,50 @@ def get_lyrics(artist, song):
         if file != None:
             return file.lyrics, cleaned_title
         else:
-            print("Sorry 🙃\n")
+            print("Sorry, this song was not found 🙃\nTry again later!\n")
+            return ("", "")
 
     except requests.exceptions.RequestException:
-        print("Sorry, this song was not found 🙃\n")
+        print("Sorry, this song was not found 🙃\nTry again later!\n")
+        return ("", "")
+
+
+def remove_subsets(list):
+    # iterate through the quotes to find subsets of other quotes
+    i = 0
+    while i < len(list):
+        # create a list with the words of the quote
+        split_quote = [word.lower().replace(",", "") for word in list[i].split(" ")]
+        # set default value for is_substring variable
+        is_substring = False
+        # sub-iteration
+        for quote in list:
+            # list all quote's words
+            words = [word.lower().replace(",", "") for word in quote.split(" ")]
+            # pass if sub-iterated quote matches iterated quote
+            if quote == list[i]:
+                pass
+            # if all (or all but one) words of sub-iterated quote match iterated quote
+            elif sum(w not in words for w in split_quote) < 2:
+                # then change value for is_substring variable
+                is_substring = True
+                break
+        # remove quote from the list if is_substring variable is True
+        if is_substring:
+            list.remove(list[i])
+            # decrement the index to account for the removed element
+            i -= 1
+        # increment the index to trigger next iteration
+        i += 1
+    return list
 
 
 def format_quotes(lyrics, title):
-    # remove the [...] notes
+    # remove the [...] and (...) notes
     cleaned_file = re.sub(
-        r"\[.*\n?.*\n?.*\n?\]|\(.*\n?.*\n?.*\n?\)|\(\n|\n\)", "", lyrics
+        r"\[.*\n?.*\n?.*\n?\]|\(.*?\n?.*?\n?.*?\n?\)|\(\n|\n\)",
+        "",
+        lyrics,
     )
     # create a list of words
     split_file = re.split(r"[\s.,;:?()]", cleaned_file)
@@ -173,44 +219,45 @@ def format_quotes(lyrics, title):
     # create a dictionary of counted words
     counted_words = {word: capitalized.count(word) for word in capitalized}
     del counted_words[""]
-    # created a sorted by values version of the dictionary
-    # sorted_words = dict(
-    #     sorted(counted_words.items(), key=lambda key_val: key_val[1], reverse=True)
-    # )
-    # create quotes list with the ones containing the most repeated words
+    # create quotes list with the ones containing the words that appear at least twice
     quotes = []
     for word in counted_words:
         if counted_words[word] > 1 and len(word) > 3:
             quotes.extend(re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I))
+    # if any quote exceeds 67 characters, remove it from the list
+    quotes = [quote for quote in quotes if len(quote) < 68]
     # sort quotes by length
     quotes.sort(key=lambda s: len(s), reverse=True)
-    # create a list of the quotes containing the longest word of the title
-    longest_title_word = max(title.split(" "), key=len)
-    longest_title_word_quotes = re.findall(
-        r"\n.*" + longest_title_word + r".*\n", cleaned_file, re.I
+    # create a list of the quotes containing significant words of the title
+    title_words = [word for word in title.split(" ") if len(word) > 3]
+    title_words_quotes = []
+    for word in title_words:
+        title_words_quotes.extend(
+            re.findall(r"\n.*" + word + r".*\n", cleaned_file, re.I)
+        )
+    # append title_words_quotes to quotes list
+    for quote in title_words_quotes:
+        quotes.append(quote)
+    # clean up the quotes
+    cleaned_quotes = list(
+        map(
+            str.strip,
+            [
+                s.replace('"', "")
+                .replace(" ,", " ")
+                .replace("  ", " ")
+                .replace("\u205f", " ")
+                .replace("’", "'")
+                for s in quotes
+            ],
+        )
     )
-    # sort longest_title_word_quotes by length
-    longest_title_word_quotes.sort(key=lambda s: len(s))
-    # longest_title_word_quotes.sort(key=lambda s: len(s), reverse=True)
-    # insert the longest of the longest_title_word_quotes at first index
-    # of quotes to ensure it will be included in the final selection
-    # for q in longest_title_word_quotes:
-    if len(longest_title_word_quotes) > 0:
-        quotes.insert(0, longest_title_word_quotes[0])
-    # print(quotes)
-    # clean the quotes
-    cleaned_quotes = map(
-        str.strip,
-        [s.replace('"', "").replace(" ,", " ").replace("  ", " ") for s in quotes],
-    )
-    # for q in cleaned_quotes:
-    #     print(q)
-    # remove duplicates preserving the order
-    unique_quotes = list(dict.fromkeys(cleaned_quotes))
-    # print(unique_quotes)
-    # for q in unique_quotes:
-    #     print(q)
-    return unique_quotes
+    # create a list for quotes sortedby number of occurences
+    sorted_quotes = []
+    # count occurences of each quotes, return an ordered list
+    for quote, occurs in Counter(cleaned_quotes).most_common():
+        sorted_quotes.append(quote)
+    return remove_subsets(sorted_quotes)
 
 
 def print_quotes(quotes):
@@ -220,27 +267,15 @@ def print_quotes(quotes):
         selected_quotes = []
         for quote in quotes:
             quote[0].upper()
-            quote_format = quote.replace("\n", "")
-            if quote_format[0] != "(" and len(quote_format.split(" ")) > 1:
-                selected_quotes.append(quote_format)
+            clean_quote = quote.replace("\n", "")
+            if clean_quote[0] != "(" and len(clean_quote.split(" ")) > 1:
+                selected_quotes.append(clean_quote)
         # print the top best quotes of the list (max 5)
         for quote in selected_quotes[:5]:
             print(quote)
     else:
         print("Sorry, this song lacks lyrics 🙃")
-    print(
-        f"""
-~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-            """
-    )
-
-
-def screen_clean():
-    os_name = platform.system()
-    if os_name == "Windows":
-        os.system("cls")
-    else:
-        os.system("clear")  # for Mac and Linux
+    print("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~\n")
 
 
 if __name__ == "__main__":

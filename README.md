@@ -1,15 +1,15 @@
 
 # TIME MACHINE
 
-#### Video Demo:  <URL HERE>
+#### Video Demo:  [https://youtu.be/udcpzr9RI_Y](https://youtu.be/udcpzr9RI_Y)
 
 #### Description:
 
-The "Time machine" application will rescape some characteristic quotes from forgotten top songs of the past, to let the user catch a glimpse of the musical pop era of their choice.
+The "Time machine" application will rescape some characteristic quotes from forgotten top songs of the past, to let the user a glimpse into the era of their choice, spanning the last 78 years of pop music. Beyond the nostalgic appeal, "Time machine" also reveals how, for example, pop culture in a year like 1959 was influenced by war feats, whereas, as soon as the next year, popular interests were more focused towards emotional feelings.
 
-On opening `project.py`, the terminal interface will automatically clean up and the user will be asked to select a year. If the year entered is not between 1946 and 2024 as prompted, or in any format that isn't a numerical integer year, the user will be prompted again. At every moment, the user can type `^ d` to exit Time machine without displaying an error.
+On opening `project.py`, the terminal interface will automatically clear, and the user will be asked to select a year. If the year entered is not between 1946 and 2024 (as prompted), or in any format that isn't a numerical integer year, the user will be prompted again. The user can also type `^d` to exit Time machine without displaying an error.
 
-Time machine will pass the selected year to the `get_charts()` function, which uses the [Wikipedia API](https://pypi.org/project/wikipedia/) in order to connect with [a Wikipedia page](https://en.wikipedia.org/wiki/List_of_Billboard_Year-End_number-one_singles_and_albums) in which the top charts of the pop era are referenced. The `get_charts()` function then uses the [BeautifulSoup API](https://pypi.org/project/beautifulsoup4/) in order to parse through the "top charts" html table rows, find the rows beginning by a year number, and creates a `years` dictionary in which every key is a year. The value for each year is also a dictionary containing six keys, refering to three song names and three corresponding artist names in this example format:
+Time machine will then pass the selected year to the `get_charts(year_of_interest)` function, which uses [Wikipedia API](https://pypi.org/project/wikipedia/) in order to connect with a [Wikipedia page](https://en.wikipedia.org/wiki/List_of_Billboard_Year-End_number-one_singles_and_albums) in which the top charts are referenced by year. The `get_charts(year_of_interest)` function then uses the [BeautifulSoup API](https://pypi.org/project/beautifulsoup4/) in order to parse through the "top charts" html table rows, find the rows beginning by a year number, and creates a `years` dictionary in which every key is a year. The value for each year is also a dictionary containing six keys, refering to three song names and three corresponding artist names in this example format:
 
 
 	1985: {
@@ -22,84 +22,53 @@ Time machine will pass the selected year to the `get_charts()` function, which u
 		}
 
 
-In this project I purposely decided to focus only on the singles, letting the albums options open to some future developing, that's why `get_charts()` only collects odd-numbered data, even-numbered data being reserved for the albums.
-Always relying on the use of various regexes throughout the whole application process to clean and extract data, the `get_charts()` function then seeds the `years` dictionary with the data collected from the wikipedia page, and the `interface()` function then displays on screen the basic information about the prompted year's three top singles.
+In this project I purposely decided to focus only on the singles, leaving the albums options open to some future developing. Therefore, `get_charts(year_of_interest)` only collects odd-numbered data, even-numbered data being reserved for the albums.
+Consistently using various regexes throughout the whole application process to clean and extract data, the `get_charts(year_of_interest)` function then populates the `years` dictionary with the data collected from the [Wikipedia page](https://en.wikipedia.org/wiki/List_of_Billboard_Year-End_number-one_singles_and_albums), and the `interface()` function then displays on screen basic information about the prompted year's three top singles.
 
-Once for each of the three top singles, Time machine will then automatically pass the artist name and the song name to the `get_lyrics()` function, which relies on the [lyricsgenius API](https://pypi.org/project/lyricsgenius/) to collect each song's lyrics from [genius website](https://genius.com/). [The requests API](https://pypi.org/project/requests/) is used to raise an exception if any, otherwise will return a tuple of two strings: one long lyrics string and another string for the title of the song.
+Once for each of the three top singles, Time machine will then automatically pass the artist name and the song name to the `get_lyrics(artist, song)` function, which relies on the [lyricsgenius API](https://pypi.org/project/lyricsgenius/) to collect the lyrics for each song from the [genius website](https://genius.com/). Not every song is available on Genius, some of the oldest ones won't be found, and the retrieving also fluctuates upon [genius website](https://genius.com/) servers, however, most of the top singles are available. Also, [the requests API](https://pypi.org/project/requests/) is used to catch exceptions and print a friendly message until next intent, otherwise, `get_lyrics(artist, song)` will return a tuple of two strings: one long lyrics string and another string for the song title.
 
-This tuple is then passed to the `format_quotes(lyrics, title)` function, whose main purpose is to select the most characteristic phrases out of the whole lyrics string, basing its choice on three parameters:
+This tuple is then passed to the `format_quotes(lyrics, title)` function, whose main purpose is to select the most characteristic phrases out of the whole lyrics string, basing its choice on several parameters:
 
-- Does the phrase contain the longest word of the song's title?
-- Does the phrase contain one of the song's most repeated words?
-- Are these words longer than four characters?
+- Does the phrase contain some significant word from the song title?
+- Does the phrase contain a word that appears at least twice in the song?
+- Are these words longer than three characters?
+- Is the phrase shorter than 67 characters?
+- Does the phrase appear frequently throughout the song?
+- Is the phrase among the longest already selected?
 
-To do so, once again, regexes are used to clean the lyrics long string, split it into a list, feed a dictionary in which every word occurence is a key whose value is the number of its occurences in the song, in this example format:
-
-
-	{'The': 16, 
-	'I': 13, 
-	'To': 12, 
-	'Never': 9, 
-	'A': 9, 
-	'Have': 9, 
-	'Dance': 9, 
-	'And': 8, 
-	'So': 8, 
-	'Gonna': 7, 
-	"I'm": 6, 
-	'Again': 6, 
-	'That': 6, 
-	'Friend': 5, 
-	'No': 5, 
-	'Better': 5, 
-	'Oh': 5, 
-	'You': 5, 
-	'With': 5, 
-	'Is': 4, 
-	'Should': 4, 
-	'Known': 4, 
-	"It's": 4, 
-	"You're": 4, 
-	'Been': 4, 
-	'Way': 4, 
-	'We': 4, 
-	'Good': 3, 
-	'Mind': 3, 
-	'In': 3, 
-	'All': 3, 
-	'Your': 3, 
-	'Guilty': 3, 
-	'Feet': 3, 
-	'Got': 3, 
-	'Rhythm': 3, 
-	'Though': 3, 
-	'Easy': 3, 
-	'Pretend': 3, 
-	'Know': 3, 
-	'Not': 3, 
-	'Fool': 3, 
-	'Than': 3, 
-	'Waste': 3, 
-	"I'd": 3, 
-	'Given': 3, 
-	'Danced': 3, 
-	'Could': 3, 
-	'This': 3, 
-	'Time': 2, 
-	'Can': 2, 
-	'Mend': 2, 
-	'Careless': 2, 
-	'Whispers': 2, 
-	'Of': 2, 'Heart': 2, 'Ignorance': 2, 'Kind': 2, "There's": 2, 'Comfort': 2, 'Truth': 2, 'Pain': 2, "You'll": 2, 'Find': 2, 'Woah': 2, 'As': 2, 'Music': 2, 'Cheat': 2, 'Chance': 2, 'Now': 2, 'Me': 2, 'Wrong': 2, 'Yeah': 1, 'Mm': 1, 'Feel': 1, 'Unsure': 1, 'Take': 1, 'Hand': 1, 'Lead': 1, 'Floor': 1, 'Dies': 1, 'Something': 1, 'Eyes': 1, 'Calls': 1, 'Silver': 1, 'Screen': 1, 'Its': 1, 'Sad': 1, 'Goodbyes': 1, 'Chеat': 1, 'Chancе': 1, 'Without': 1, 'Love': 1, 'Tonight': 1, 'Seems': 1, 'Loud': 1, 'Wish': 1, 'Lose': 1, 'Crowd': 1, 'Maybe': 1, "We'd": 1, 'Hurt': 1, 'Each': 1, 'Other': 1, 'Things': 1, 'Want': 1, 'Say': 1, 'Together': 1, 'Lived': 1, 'Forever': 1, 'But': 1, "Who's": 1, 'Please': 1, 'Stay': 1, 'Gone': 1, 'Was': 1, 'What': 1, 'Did': 1, 'Had': 1, 'Leave': 1, 'Alone': 1}
+To do so, once again, regexes are used to clean the lyrics long string, split it into a list, and populate a dictionary in which every word is a key whose value is the number of its occurences in the song, in this example format:
 
 
+	{'The': 16,
+	'I': 13,
+	'To': 12,
+	'Never': 9,
+	'A': 9,
+	'Have': 9,
+	'Dance': 9,
+	'And': 8,
+	'So': 8,
+	'Gonna': 7,
+	"I'm": 6,
+	'Again': 6,
+	'That': 6,
+	'Friend': 5,
+	'No': 5,
+	'Better': 5,
+	'Oh': 5,
+	'You': 5,
+	'With': 5,
+	'Is': 4, AND SO ON...}
 
-In this example one can appreciate the complex questions rising at the time of chosing the right balance between most repeated words, which tend to be very short in  a pop song, and between longest words, obviously more interesting but also 
+
+Once all the quotes of interest are listed, `format_quotes(lyrics, title)` keeps on doing a bit of cleaning to avoid near-duplicates before sorting them by number of occurences with the help of `Counter` function from `collections` module. Then the list is passe through the `remove_subsets(list)` function before `format_quotes(lyrics, title)` returns it.
+
+The purpose of `remove_subsets(list)` is to find subsets of other quotes. Thus, if almost all (all, or all but one) of the words in a quote belong to another quote, it will be removed from the list, to prevent the user from feeling they're reading the same quote twice when only one word differs.
+
+The `interface()` function will then pass the list returned by `format_quotes(lyrics, title)` to `print_quotes(quotes)` in order to display the five most characteristic quotes from everyone of the three top singles of the selected year, after some additional final cleaning in order to catch some special cases.
 
 
-
-
-
+#### Hope you'll enjoy using "Time machine" as much as I enjoyed writing it!
 
 
 
