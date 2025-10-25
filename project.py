@@ -159,7 +159,7 @@ def get_lyrics(artist, song):
 
     # my personal token
     tokenized = lyricsgenius.Genius(
-        "w7Y1kofFOGXkztFMC5gC4SaRzxm24pxZraUU8n902tbu9opjgdkQlh8WHP5BDylB"
+        "w7Y1kofFOGXkztFMC5gC4SaRzxm24pxZraUU8n902tbu9opjgdkQlh8WHP5BDylB", retries=2
     )
     # retrieve the song's lyrics
     try:
@@ -171,7 +171,15 @@ def get_lyrics(artist, song):
             return ("", "")
 
     except requests.exceptions.RequestException:
-        print("Sorry, this song was not found 🙃\nTry again later!\n")
+        print(
+            "Sorry, this song was not found 🙃\nTry again later!\n(connection error)\n"
+        )
+        return ("", "")
+
+    except AssertionError:
+        print(
+            "Sorry, this song was not found 🙃\nTry again later!\n--- Codespace acces_token error ---\n"
+        )
         return ("", "")
 
 

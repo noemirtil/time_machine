@@ -5,6 +5,8 @@
 
 #### Description:
 
+##### _Caution_: This project can't run from Codespace (would run into an access_token AssertionError)
+
 The "Time machine" application will rescape some characteristic quotes from forgotten top songs of the past, to let the user a glimpse into the era of their choice, spanning the last 78 years of pop music. Beyond the nostalgic appeal, "Time machine" also reveals how, for example, pop culture in a year like 1959 was influenced by war feats, whereas, as soon as the next year, popular interests were more focused towards emotional feelings.
 
 On opening `project.py`, the terminal interface will automatically clear, and the user will be asked to select a year. If the year entered is not between 1946 and 2024 (as prompted), or in any format that isn't a numerical integer year, the user will be prompted again. The user can also type `^d` to exit Time machine without displaying an error.
